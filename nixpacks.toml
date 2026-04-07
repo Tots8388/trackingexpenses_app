@@ -1,12 +1,17 @@
 [phases.setup]
-nixPkgs = ["python313", "nodejs_22"]
+nixPkgs = ["...", "nodejs_22"]
 
-[phases.install]
-cmds = ["pip install -r requirements.txt", "cd frontend && npm install"]
+[phases.frontend_install]
+dependsOn = ["install"]
+cmds = ["cd frontend && npm install"]
+
+[phases.frontend_build]
+dependsOn = ["frontend_install"]
+cmds = ["cd frontend && npm run build"]
 
 [phases.build]
+dependsOn = ["frontend_build"]
 cmds = [
-  "cd frontend && npm run build",
   "DJANGO_SETTINGS_MODULE=tracking_expenses.settings_prod python manage.py collectstatic --noinput",
   "DJANGO_SETTINGS_MODULE=tracking_expenses.settings_prod python manage.py migrate"
 ]
