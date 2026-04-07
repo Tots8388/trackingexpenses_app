@@ -5,7 +5,13 @@ from .settings import *
 DEBUG = False
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.railway.app').split(',')
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+] + [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 # Database - use Railway's PostgreSQL
 DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -44,5 +50,11 @@ CORS_ALLOW_ALL_ORIGINS = not CORS_ALLOWED_ORIGINS
 # Path to the React SPA index.html (used by the catch-all view)
 FRONTEND_DIR = BASE_DIR / 'frontend' / 'dist'
 
-# Email - use console for now, switch to real SMTP later
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email - Gmail SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER', 'noreply@example.com')
