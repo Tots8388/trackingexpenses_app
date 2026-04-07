@@ -4,6 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "gunicorn tracking_expenses.wsgi --bind 0.0.0.0:$PORT"
+    "startCommand": "bash start.sh"
   }
 }

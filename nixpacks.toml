@@ -12,6 +12,5 @@ cmds = ["cd frontend && npm run build"]
 [phases.build]
 dependsOn = ["frontend_build"]
 cmds = [
-  "DJANGO_SETTINGS_MODULE=tracking_expenses.settings_prod python manage.py collectstatic --noinput",
-  "DJANGO_SETTINGS_MODULE=tracking_expenses.settings_prod python manage.py migrate"
+  "DJANGO_SETTINGS_MODULE=tracking_expenses.settings_prod python manage.py collectstatic --noinput"
 ]
