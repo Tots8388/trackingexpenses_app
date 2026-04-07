@@ -1,9 +1,9 @@
 [phases.setup]
-nixPkgs = ["...", "nodejs"]
+nixPkgs = ["...", "nodejs_23"]
 
 [phases.frontend_install]
 dependsOn = ["install"]
-cmds = ["cd frontend && npm install"]
+cmds = ["cd frontend && rm -f package-lock.json && npm install"]
 
 [phases.frontend_build]
 dependsOn = ["frontend_install"]
