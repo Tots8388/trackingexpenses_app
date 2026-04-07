@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #FAFAF7; margin: 0; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; border: 1px solid #F0EDE8; overflow: hidden; }
+    .header { background: {% if level == 'exceeded' %}#C62828{% else %}#F59E0B{% endif %}; color: white; padding: 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 1.3rem; }
+    .body { padding: 24px; }
+    .progress-bar { background: #F0EDE8; border-radius: 8px; height: 28px; overflow: hidden; margin: 16px 0; position: relative; }
+    .progress-fill { height: 100%; border-radius: 8px; background: {% if level == 'exceeded' %}#C62828{% else %}#F59E0B{% endif %}; }
+    .progress-label { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-weight: 700; font-size: 0.85rem; }
+    .detail { background: {% if level == 'exceeded' %}#FFEBEE{% else %}#FFF3E0{% endif %}; border-radius: 8px; padding: 14px; margin: 12px 0; font-size: 0.9rem; }
+    .footer { text-align: center; padding: 16px; font-size: 0.75rem; color: #9E9E9E; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Budget {% if level == 'exceeded' %}Exceeded{% else %}Warning{% endif %}: {{ category }}</h1>
+    </div>
+    <div class="body">
+      <p>Hi {{ user.first_name|default:user.username }},</p>
+      <p>
+        {% if level == 'exceeded' %}
+          You've exceeded your <strong>{{ category }}</strong> budget this month.
+        {% else %}
+          You've reached <strong>{{ pct }}%</strong> of your <strong>{{ category }}</strong> budget this month.
+        {% endif %}
+      </p>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:{% if pct > 100 %}100{% else %}{{ pct }}{% endif %}%;"></div>
+        <span class="progress-label">{{ pct }}%</span>
+      </div>
+      <div class="detail">
+        <strong>Spent:</strong> ${{ spent|floatformat:2 }}<br>
+        <strong>Budget:</strong> ${{ limit|floatformat:2 }}<br>
+        {% if level == 'exceeded' %}
+          <strong>Over by:</strong> ${{ spent|floatformat:2 }}
+        {% else %}
+          <strong>Remaining:</strong> ${{ limit|floatformat:2 }}
+        {% endif %}
+      </div>
+      <p style="font-size:0.85rem; color:#6B6B6B;">
+        Manage your budgets in the Budgets page.
+      </p>
+    </div>
+    <div class="footer">Expense Tracker</div>
+  </div>
+</body>
+</html>

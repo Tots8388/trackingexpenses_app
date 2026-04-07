@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Expense Tracker{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root, [data-theme="light"] {
+      --primary: #E8910C;
+      --primary-light: #FFF3E0;
+      --primary-dark: #C47A0A;
+      --accent-green: #2E7D32;
+      --accent-green-light: #E8F5E9;
+      --accent-red: #C62828;
+      --accent-red-light: #FFEBEE;
+      --bg-main: #FAFAF7;
+      --bg-card: #FFFFFF;
+      --text-primary: #1A1A1A;
+      --text-secondary: #6B6B6B;
+      --text-muted: #9E9E9E;
+      --border: #F0EDE8;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    [data-theme="dark"] {
+      --primary: #F0A030;
+      --primary-light: #2A2215;
+      --primary-dark: #D89020;
+      --accent-green: #66BB6A;
+      --accent-green-light: #1B2E1C;
+      --accent-red: #EF5350;
+      --accent-red-light: #2E1515;
+      --bg-main: #121212;
+      --bg-card: #1E1E1E;
+      --text-primary: #E8E4DE;
+      --text-secondary: #A0A0A0;
+      --text-muted: #6B6B6B;
+      --border: #2A2A2A;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+
+    [data-theme="dark"] .form-control:focus,
+    [data-theme="dark"] .form-select:focus {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+    }
+
+    [data-theme="dark"] .btn-close { filter: invert(1); }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      margin: 0;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .top-navbar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background-color 0.3s;
+    }
+
+    .top-navbar .container { display: flex; align-items: center; justify-content: space-between; }
+
+    .brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand:hover { color: var(--text-primary); }
+
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 1.1rem;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+
+    .nav-link-item {
+      font-size: 0.85rem; font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .nav-link-item:hover, .nav-link-item.active {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .nav-user { display: flex; align-items: center; gap: 10px; }
+
+    .user-avatar {
+      width: 34px; height: 34px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem;
+    }
+
+    .user-name { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+
+    .btn-logout {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.8rem; font-weight: 500;
+      padding: 6px 14px; border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+      background: var(--accent-red-light);
+    }
+
+    .theme-toggle {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1rem;
+      transition: all 0.2s; padding: 0;
+    }
+
+    .theme-toggle:hover { border-color: var(--primary); background: var(--primary-light); }
+
+    .main-content { padding: 28px 0 60px; }
+
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+    }
+
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .stat-card .stat-label { font-size: 0.78rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-card .stat-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.55rem; font-weight: 700; }
+    .stat-card .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+
+    .stat-card.income .stat-icon { background: var(--accent-green-light); color: var(--accent-green); }
+    .stat-card.income .stat-value { color: var(--accent-green); }
+    .stat-card.expense .stat-icon { background: var(--accent-red-light); color: var(--accent-red); }
+    .stat-card.expense .stat-value { color: var(--accent-red); }
+    .stat-card.balance .stat-icon { background: var(--primary-light); color: var(--primary); }
+    .stat-card.balance .stat-value { color: var(--primary); }
+
+    .content-card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      padding: 24px;
+      transition: background-color 0.3s;
+    }
+
+    .content-card .card-header-custom { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .content-card .card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+
+    .btn-primary-custom {
+      background: var(--primary); color: white; border: none;
+      font-weight: 600; font-size: 0.875rem;
+      padding: 10px 22px; border-radius: 10px;
+      cursor: pointer; transition: all 0.2s;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+
+    .btn-primary-custom:hover { background: var(--primary-dark); color: white; transform: translateY(-1px); }
+
+    .btn-outline-custom {
+      background: transparent; color: var(--text-secondary);
+      border: 1px solid var(--border);
+      font-weight: 500; font-size: 0.85rem;
+      padding: 8px 18px; border-radius: 10px;
+      cursor: pointer; transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-outline-custom:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+    .transaction-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .transaction-item:last-child { border-bottom: none; }
+    .transaction-left { display: flex; align-items: center; gap: 14px; }
+    .transaction-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .transaction-icon.income { background: var(--accent-green-light); color: var(--accent-green); }
+    .transaction-icon.expense { background: var(--accent-red-light); color: var(--accent-red); }
+    .transaction-desc { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
+    .transaction-cat { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .transaction-amount { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.95rem; }
+    .transaction-amount.income { color: var(--accent-green); }
+    .transaction-amount.expense { color: var(--accent-red); }
+    .transaction-date { font-size: 0.75rem; color: var(--text-muted); text-align: right; margin-top: 2px; }
+
+    .form-control, .form-select {
+      border: 1.5px solid var(--border); border-radius: 10px;
+      padding: 10px 14px; font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(232, 145, 12, 0.12); }
+    .form-label { font-weight: 600; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px; }
+
+    .alert { border-radius: 10px; border: none; font-size: 0.875rem; font-weight: 500; }
+    .alert-success { background: var(--accent-green-light); color: var(--accent-green); }
+    .alert-error, .alert-danger { background: var(--accent-red-light); color: var(--accent-red); }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .page-header h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin: 0; }
+    .page-header .subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+
+    .filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .filter-chip { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; text-decoration: none; transition: all 0.2s; }
+    .filter-chip:hover, .filter-chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+    .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+
+    .receipt-thumb { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+    .receipt-thumb:hover { transform: scale(1.15); }
+
+    .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .stat-card .stat-value { font-size: 1.25rem; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .nav-user .user-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+  {% if user.is_authenticated %}
+  <nav class="top-navbar">
+    <div class="container">
+      <a class="brand" href="/">
+        <span class="brand-icon">💰</span>
+        Expense Tracker
+      </a>
+      <div class="nav-links">
+        <a href="/" class="nav-link-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="{% url 'transaction_list' %}" class="nav-link-item {% if request.resolver_match.url_name == 'transaction_list' %}active{% endif %}">Transactions</a>
+        <a href="{% url 'reports' %}" class="nav-link-item {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">Reports</a>
+        <a href="{% url 'budget_list' %}" class="nav-link-item {% if request.resolver_match.url_name == 'budget_list' %}active{% endif %}">Budgets</a>
+        <a href="{% url 'recurring_list' %}" class="nav-link-item {% if request.resolver_match.url_name == 'recurring_list' %}active{% endif %}">Recurring</a>
+        <a href="{% url 'notification_settings' %}" class="nav-link-item {% if request.resolver_match.url_name == 'notification_settings' %}active{% endif %}">Settings</a>
+      </div>
+      <div class="nav-user">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+          <span id="themeIcon">🌙</span>
+        </button>
+        <a href="{% url 'profile' %}" style="text-decoration:none; display:flex; align-items:center; gap:8px;">
+          <div class="user-avatar">{{ user.username|make_list|first|upper }}</div>
+          <span class="user-name">{{ user.username }}</span>
+        </a>
+        <form method="post" action="{% url 'logout' %}" class="m-0">
+          {% csrf_token %}
+          <button type="submit" class="btn-logout">Logout</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <div class="container main-content">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      document.getElementById('themeIcon').textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+    (function() {
+      const saved = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+      const icon = document.getElementById('themeIcon');
+      if (icon) icon.textContent = saved === 'dark' ? '☀️' : '🌙';
+    })();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

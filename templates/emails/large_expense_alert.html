@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #FAFAF7; margin: 0; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; border: 1px solid #F0EDE8; overflow: hidden; }
+    .header { background: #C62828; color: white; padding: 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 1.3rem; }
+    .body { padding: 24px; }
+    .amount { font-size: 2rem; font-weight: 800; color: #C62828; text-align: center; margin: 16px 0; }
+    .detail { background: #FFEBEE; border-radius: 8px; padding: 14px; margin: 12px 0; font-size: 0.9rem; }
+    .detail strong { color: #1A1A1A; }
+    .footer { text-align: center; padding: 16px; font-size: 0.75rem; color: #9E9E9E; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Large Expense Alert</h1>
+    </div>
+    <div class="body">
+      <p>Hi {{ user.first_name|default:user.username }},</p>
+      <p>You just recorded an expense that exceeds your alert threshold:</p>
+      <div class="amount">${{ amount|floatformat:2 }}</div>
+      <div class="detail">
+        <strong>Description:</strong> {{ transaction.description|default:"No description" }}<br>
+        <strong>Category:</strong> {{ transaction.category.name|default:"Uncategorized" }}<br>
+        <strong>Date:</strong> {{ transaction.date|date:"M d, Y" }}<br>
+        <strong>Your threshold:</strong> ${{ threshold|floatformat:2 }}
+      </div>
+      <p style="font-size:0.85rem; color:#6B6B6B;">
+        You can adjust your threshold in Settings &gt; Notifications.
+      </p>
+    </div>
+    <div class="footer">Expense Tracker</div>
+  </div>
+</body>
+</html>

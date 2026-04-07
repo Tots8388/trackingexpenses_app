@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Transactions</h1>
+    <p class="subtitle">Manage all your income and expenses</p>
+  </div>
+  <a href="{% url 'transaction_add' %}" class="btn-primary-custom">+ Add Transaction</a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card income">
+      <div class="stat-label">Income</div>
+      <div class="stat-value" style="font-size:1.2rem;">{{ total_income|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card expense">
+      <div class="stat-label">Expenses</div>
+      <div class="stat-value" style="font-size:1.2rem;">{{ total_expense|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card balance">
+      <div class="stat-label">Balance</div>
+      <div class="stat-value" style="font-size:1.2rem;">{{ balance|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card" style="border-left: 3px solid var(--text-muted);">
+      <div class="stat-label">Total Volume</div>
+      <div class="stat-value" style="font-size:1.2rem;">{{ total_volume|floatformat:2 }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="content-card mb-4">
+  <form method="get">
+    <!-- Type chips + search -->
+    <div class="filter-bar mb-3">
+      <a href="{% url 'transaction_list' %}" class="filter-chip {% if not request.GET.type %}active{% endif %}">All</a>
+      <a href="?type=income" class="filter-chip {% if request.GET.type == 'income' %}active{% endif %}">Income</a>
+      <a href="?type=expense" class="filter-chip {% if request.GET.type == 'expense' %}active{% endif %}">Expenses</a>
+      <div class="ms-auto" style="min-width:200px;">
+        <input type="text" name="q" value="{{ search_q }}" class="form-control" placeholder="Search descriptions..." style="font-size:0.85rem;">
+      </div>
+    </div>
+    <!-- Advanced filters row -->
+    <div class="d-flex align-items-end gap-2 flex-wrap">
+      <div>
+        <label class="form-label" style="font-size:0.75rem;">Category</label>
+        <select name="category" class="form-select" style="font-size:0.85rem; min-width:140px;">
+          <option value="">All Categories</option>
+          {% for c in categories %}
+            <option value="{{ c.id }}" {% if request.GET.category == c.id|stringformat:"d" %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="form-label" style="font-size:0.75rem;">From</label>
+        <input type="date" name="date_from" value="{{ request.GET.date_from }}" class="form-control" style="font-size:0.85rem;">
+      </div>
+      <div>
+        <label class="form-label" style="font-size:0.75rem;">To</label>
+        <input type="date" name="date_to" value="{{ request.GET.date_to }}" class="form-control" style="font-size:0.85rem;">
+      </div>
+      <div>
+        <label class="form-label" style="font-size:0.75rem;">Month</label>
+        <input type="month" name="month" value="{{ request.GET.month }}" class="form-control" style="font-size:0.85rem;">
+      </div>
+      {% if request.GET.type %}<input type="hidden" name="type" value="{{ request.GET.type }}">{% endif %}
+      <button type="submit" class="btn-primary-custom" style="height:42px;">Filter</button>
+      {% if request.GET.q or request.GET.category or request.GET.date_from or request.GET.date_to or request.GET.month %}
+        <a href="{% url 'transaction_list' %}{% if request.GET.type %}?type={{ request.GET.type }}{% endif %}" class="btn-outline-custom" style="height:42px; display:flex; align-items:center;">Clear</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<!-- Transaction List -->
+<div class="content-card">
+  {% if transactions %}
+    {% for tx in transactions %}
+    <div class="transaction-item">
+      <div class="transaction-left">
+        <div class="transaction-icon {{ tx.type }}">
+          {% if tx.type == 'income' %}↑{% else %}↓{% endif %}
+        </div>
+        <div>
+          <div class="transaction-desc">{{ tx.description|default:"No description" }}</div>
+          <div class="transaction-cat">{% if tx.category %}{{ tx.category.name }}{% else %}Uncategorized{% endif %}</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end">
+          <div class="transaction-amount {{ tx.type }}">
+            {% if tx.type == 'income' %}+{% else %}-{% endif %}{{ tx.amount|floatformat:2 }}
+          </div>
+          <div class="transaction-date">{{ tx.date }}</div>
+        </div>
+        {% if tx.receipt %}
+          <a href="{{ tx.receipt.url }}" target="_blank">
+            <img src="{{ tx.receipt.url }}" class="receipt-thumb" alt="Receipt">
+          </a>
+        {% endif %}
+        <div class="d-flex gap-1">
+          <a href="{% url 'transaction_edit' tx.pk %}" class="btn-outline-custom" style="padding:5px 10px; font-size:0.75rem;">Edit</a>
+          <a href="{% url 'transaction_delete' tx.pk %}" class="btn-outline-custom" style="padding:5px 10px; font-size:0.75rem; color:var(--accent-red); border-color:var(--accent-red-light);">Del</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📝</div>
+      <h3>No transactions found</h3>
+      <p>Try adjusting your filters or add a new transaction.</p>
+      <a href="{% url 'transaction_add' %}" class="btn-primary-custom mt-3">+ Add Transaction</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

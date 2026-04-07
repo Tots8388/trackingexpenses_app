@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Budgets - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Budgets</h1>
+    <p class="subtitle">{{ month_display }} &mdash; Track spending against your limits</p>
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <form method="get" style="display:flex; align-items:center; gap:8px;">
+      <input type="month" name="month" value="{{ selected_month }}" class="form-control" style="width:auto;" onchange="this.form.submit()">
+    </form>
+    <a href="{% url 'budget_add' %}" class="btn-primary-custom">+ Add Budget</a>
+  </div>
+</div>
+
+{% if budgets %}
+<div class="row g-3">
+  {% for b in budgets %}
+  <div class="col-md-6">
+    <div class="content-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <div style="font-weight:700; font-size:0.95rem;">{{ b.category }}</div>
+          <div style="font-size:0.78rem; color:var(--text-muted);">
+            ${{ b.spent|floatformat:2 }} of ${{ b.amount|floatformat:2 }}
+          </div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <a href="{% url 'budget_edit' b.id %}" class="btn-outline-custom" style="padding:5px 12px; font-size:0.78rem;">Edit</a>
+          <form method="post" action="{% url 'budget_delete' b.id %}" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn-outline-custom" style="padding:5px 12px; font-size:0.78rem; color:var(--accent-red); border-color:var(--accent-red);" onclick="return confirm('Delete this budget?')">Delete</button>
+          </form>
+        </div>
+      </div>
+      <div style="background:var(--bg-main); border-radius:8px; height:24px; overflow:hidden; position:relative;">
+        <div style="
+          height:100%;
+          border-radius:8px;
+          width:{{ b.pct }}%;
+          background: {% if b.over %}var(--accent-red){% elif b.pct >= 80 %}#F59E0B{% else %}var(--accent-green){% endif %};
+          transition: width 0.4s ease;
+        "></div>
+        <span style="position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.72rem; font-weight:700; color:var(--text-secondary);">
+          {{ b.pct }}%
+        </span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.78rem; color:var(--text-muted);">
+        <span>Spent: ${{ b.spent|floatformat:2 }}</span>
+        <span {% if b.over %}style="color:var(--accent-red); font-weight:600;"{% endif %}>
+          {% if b.over %}Over budget!{% else %}Remaining: ${{ b.remaining|floatformat:2 }}{% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="content-card">
+  <div class="empty-state">
+    <div class="empty-state-icon">📊</div>
+    <h3>No budgets set</h3>
+    <p>Create budgets to track your spending by category for {{ month_display }}.</p>
+    <a href="{% url 'budget_add' %}" class="btn-primary-custom mt-3">+ Add Budget</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

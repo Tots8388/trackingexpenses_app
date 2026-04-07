@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Profile</h1>
+    <p class="subtitle">Your account overview</p>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- User Info -->
+  <div class="col-md-4">
+    <div class="content-card" style="text-align:center;">
+      <div style="width:72px; height:72px; border-radius:50%; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:800; margin:0 auto 14px;">
+        {{ user.username|make_list|first|upper }}
+      </div>
+      <h2 style="font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:1.2rem; margin:0;">
+        {{ user.first_name|default:user.username }} {{ user.last_name }}
+      </h2>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin:4px 0 0;">@{{ user.username }}</p>
+      {% if user.email %}
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin:4px 0 0;">{{ user.email }}</p>
+      {% endif %}
+      <p style="font-size:0.75rem; color:var(--text-muted); margin:12px 0 0;">
+        Member since {{ user.date_joined|date:"M d, Y" }}
+      </p>
+      <div style="margin-top:16px; display:flex; gap:8px; justify-content:center;">
+        <a href="{% url 'password_change' %}" class="btn-outline-custom" style="font-size:0.8rem;">Change Password</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="col-md-8">
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-lg-3">
+        <div class="stat-card balance">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="stat-label">Transactions</div>
+              <div class="stat-value">{{ tx_count }}</div>
+            </div>
+            <div class="stat-icon">📋</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card income">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="stat-label">Budgets</div>
+              <div class="stat-value">{{ budget_count }}</div>
+            </div>
+            <div class="stat-icon">📊</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card expense">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="stat-label">Recurring</div>
+              <div class="stat-value">{{ recurring_count }}</div>
+            </div>
+            <div class="stat-icon">🔄</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stat-card balance">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="stat-label">{{ month_name }}</div>
+              <div class="stat-value" style="font-size:1.1rem;">${{ month_income|floatformat:0 }}</div>
+            </div>
+            <div class="stat-icon">💰</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- This Month Summary -->
+    <div class="content-card mb-3">
+      <div class="card-header-custom">
+        <h3 class="card-title">{{ month_name }} Summary</h3>
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <div style="padding:14px; background:var(--accent-green-light); border-radius:10px;">
+            <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Income</div>
+            <div style="font-size:1.3rem; font-weight:800; color:var(--accent-green); margin-top:4px;">${{ month_income|floatformat:2 }}</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div style="padding:14px; background:var(--accent-red-light); border-radius:10px;">
+            <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Expenses</div>
+            <div style="font-size:1.3rem; font-weight:800; color:var(--accent-red); margin-top:4px;">${{ month_expense|floatformat:2 }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Preferences Summary -->
+    <div class="content-card">
+      <div class="card-header-custom">
+        <h3 class="card-title">Notification Preferences</h3>
+        <a href="{% url 'notification_settings' %}" class="btn-outline-custom" style="font-size:0.78rem; padding:5px 12px;">Edit</a>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:0.85rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Weekly Summary</span>
+          <span style="font-weight:600; color:{% if prefs.weekly_summary %}var(--accent-green){% else %}var(--text-muted){% endif %};">
+            {% if prefs.weekly_summary %}On{% else %}Off{% endif %}
+          </span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Budget Alerts</span>
+          <span style="font-weight:600; color:{% if prefs.budget_alerts %}var(--accent-green){% else %}var(--text-muted){% endif %};">
+            {% if prefs.budget_alerts %}On{% else %}Off{% endif %}
+          </span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span>Large Expense Alerts (>${{ prefs.large_expense_threshold|floatformat:0 }})</span>
+          <span style="font-weight:600; color:{% if prefs.large_expense_alert %}var(--accent-green){% else %}var(--text-muted){% endif %};">
+            {% if prefs.large_expense_alert %}On{% else %}Off{% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #FAFAF7; margin: 0; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 12px; border: 1px solid #F0EDE8; overflow: hidden; }
+    .header { background: #E8910C; color: white; padding: 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 1.3rem; }
+    .header .dates { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+    .body { padding: 24px; }
+    .stats { display: flex; gap: 12px; margin: 16px 0; }
+    .stat { flex: 1; background: #FAFAF7; border-radius: 10px; padding: 14px; text-align: center; }
+    .stat .label { font-size: 0.72rem; text-transform: uppercase; color: #9E9E9E; font-weight: 600; letter-spacing: 0.5px; }
+    .stat .value { font-size: 1.3rem; font-weight: 800; margin-top: 4px; }
+    .stat .value.income { color: #2E7D32; }
+    .stat .value.expense { color: #C62828; }
+    .stat .value.net { color: #E8910C; }
+    .categories { margin: 16px 0; }
+    .categories h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; }
+    .cat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F0EDE8; font-size: 0.85rem; }
+    .cat-row:last-child { border-bottom: none; }
+    .footer { text-align: center; padding: 16px; font-size: 0.75rem; color: #9E9E9E; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Weekly Summary</h1>
+      <div class="dates">{{ week_start|date:"M d" }} - {{ week_end|date:"M d, Y" }}</div>
+    </div>
+    <div class="body">
+      <p>Hi {{ user.first_name|default:user.username }}, here's your week at a glance:</p>
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Income</div>
+          <div class="value income">${{ total_income|floatformat:2 }}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Expenses</div>
+          <div class="value expense">${{ total_expense|floatformat:2 }}</div>
+        </div>
+        <div class="stat">
+          <div class="label">Net</div>
+          <div class="value net">${{ net|floatformat:2 }}</div>
+        </div>
+      </div>
+      <p style="font-size:0.85rem; color:#6B6B6B;">{{ transaction_count }} transaction{{ transaction_count|pluralize }} this week.</p>
+
+      {% if top_categories %}
+      <div class="categories">
+        <h3>Top Expense Categories</h3>
+        {% for cat in top_categories %}
+        <div class="cat-row">
+          <span>{{ cat.name }}</span>
+          <span style="font-weight:600; color:#C62828;">${{ cat.total|floatformat:2 }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <p style="font-size:0.85rem; color:#6B6B6B; margin-top:16px;">
+        Log in to your dashboard for full details and charts.
+      </p>
+    </div>
+    <div class="footer">
+      Expense Tracker &middot; You can disable weekly summaries in Settings &gt; Notifications.
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Recurring Transactions - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Recurring Transactions</h1>
+    <p class="subtitle">Automate your regular income and expenses</p>
+  </div>
+  <a href="{% url 'recurring_add' %}" class="btn-primary-custom">+ Add Recurring</a>
+</div>
+
+{% if active %}
+<div class="content-card mb-4">
+  <div class="card-header-custom">
+    <h3 class="card-title">Active</h3>
+  </div>
+  {% for r in active %}
+  <div class="transaction-item">
+    <div class="transaction-left">
+      <div class="transaction-icon {{ r.type }}">
+        {% if r.type == 'income' %}📈{% else %}📉{% endif %}
+      </div>
+      <div>
+        <div class="transaction-desc">{{ r.description|default:"No description" }}</div>
+        <div class="transaction-cat">
+          {{ r.category.name|default:"Uncategorized" }} &middot;
+          {{ r.get_frequency_display }} &middot;
+          Next: {{ r.next_run|date:"M d, Y" }}
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="text-align:right;">
+        <div class="transaction-amount {{ r.type }}">
+          {% if r.type == 'income' %}+{% else %}-{% endif %}${{ r.amount|floatformat:2 }}
+        </div>
+      </div>
+      <div style="display:flex; gap:4px;">
+        <form method="post" action="{% url 'recurring_toggle' r.pk %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="btn-outline-custom" style="padding:5px 10px; font-size:0.75rem;" title="Pause">⏸</button>
+        </form>
+        <a href="{% url 'recurring_edit' r.pk %}" class="btn-outline-custom" style="padding:5px 10px; font-size:0.75rem;">Edit</a>
+        <a href="{% url 'recurring_delete' r.pk %}" class="btn-outline-custom" style="padding:5px 10px; font-size:0.75rem; color:var(--accent-red); border-color:var(--accent-red);">Del</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if inactive %}
+<div class="content-card mb-4">
+  <div class="card-header-custom">
+    <h3 class="card-title" style="color:var(--text-muted);">Paused</h3>
+  </div>
+  {% for r in inactive %}
+  <div class="transaction-item" style="opacity:0.6;">
+    <div class="transaction-left">
+      <div class="transaction-icon {{ r.type }}">
+        {% if r.type == 'income' %}📈{% else %}📉{% endif %}
+      </div>
+      <div>
+        <div class="transaction-desc">{{ r.description|default:"No description" }}</div>
+        <div class="transaction-cat">
+          {{ r.category.name|default:"Uncategorized" }} &middot;
+          {{ r.get_frequency_display }}
+          {% if r.end_date %}&middot; Ended: {{ r.end_date|date:"M d, Y" }}{% endif %}
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div style="text-align:right;">
+        <div class="transaction-amount {{ r.type }}">
+          {% if r.type == 'income' %}+{% else %}-{% endif %}${{ r.amount|floatformat:2 }}
+        </div>
+      </div>
+      <div style="display:flex; gap:4px;">
+        <form method="post" action="{% url 'recurring_toggle' r.pk %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="btn-outline-custom" style="padding:5px 10px; font-size:0.75rem;" title="Resume">▶</button>
+        </form>
+        <a href="{% url 'recurring_delete' r.pk %}" class="btn-outline-custom" style="padding:5px 10px; font-size:0.75rem; color:var(--accent-red); border-color:var(--accent-red);">Del</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if not active and not inactive %}
+<div class="content-card">
+  <div class="empty-state">
+    <div class="empty-state-icon">🔄</div>
+    <h3>No recurring transactions</h3>
+    <p>Set up recurring transactions to automatically track regular income and expenses.</p>
+    <a href="{% url 'recurring_add' %}" class="btn-primary-custom mt-3">+ Add Recurring</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

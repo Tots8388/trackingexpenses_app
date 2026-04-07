@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(python manage.py check)",
+      "Bash(python manage.py migrate)",
+      "Bash(python manage.py makemigrations tracker)",
+      "Bash(python manage.py loaddata tracker/fixtures/categories.json)",
+      "Bash(python -c ':*)",
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")",
+      "Bash(npm install:*)"
+    ]
+  },
+  "outputStyle": "default"
+}
