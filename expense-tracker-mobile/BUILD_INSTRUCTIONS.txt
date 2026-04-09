@@ -1,0 +1,171 @@
+============================================================
+  Expense Tracker Mobile - Build & Play Store Guide
+============================================================
+
+PREREQUISITE
+------------
+You must be logged in: run "eas login" first.
+Your account: tots8388 (joshua24tuitoek@gmail.com)
+Project: @tots8388s-organization/expense-tracker
+
+
+SECTION 1: APP ICONS (do this first)
+-------------------------------------
+The current icons are Expo defaults. Replace them before building.
+
+Source SVGs are in assets/:
+  - icon-source.svg         (rounded corners, for icon.png)
+  - adaptive-icon-source.svg (no corners, Android adds its mask)
+
+Convert SVGs to PNGs using any of these free tools:
+  - https://svgtopng.com (upload SVG, set size, download PNG)
+  - Figma (import SVG, export as PNG)
+  - Inkscape (free desktop app)
+
+Required output files (overwrite the existing defaults):
+  assets/icon.png          - 1024x1024 px (app icon)
+  assets/adaptive-icon.png - 1024x1024 px (Android adaptive icon)
+  assets/splash-icon.png   - 200x200 px  (splash screen icon)
+  assets/favicon.png       - 48x48 px    (web fallback, optional)
+
+Play Store also needs:
+  - Hi-res icon:       512x512 px (can crop from icon.png)
+  - Feature graphic:   1024x500 px (create in Canva/Figma, shows
+                       app name + tagline + screenshot/mockup)
+  - Screenshots:       4-8 phone screenshots (1080x1920 or similar)
+                       Take these after installing the test APK
+
+
+SECTION 2: BUILD COMMANDS
+--------------------------
+IMPORTANT: You need a clean network (no SSL-intercepting proxy).
+Use a mobile hotspot or home WiFi without corporate firewall.
+
+Test APK (install directly on phone):
+
+  cd C:\Users\rtyui\trackingexpenses_app\expense-tracker-mobile
+  eas build --platform android --profile preview
+
+Play Store AAB:
+
+  eas build --platform android --profile production
+
+
+IF BUILD FAILS: "self-signed certificate" or 403
+--------------------------------------------------
+Your current network has an SSL-intercepting proxy. Either:
+1. Switch to a clean network (recommended), OR
+2. Try this PowerShell workaround:
+
+  $env:NODE_TLS_REJECT_UNAUTHORIZED="0"
+  eas build --platform android --profile preview
+
+
+SECTION 3: INSTALL & TEST
+--------------------------
+1. EAS prints a download URL for the APK
+2. Download the APK on your Android phone (or transfer via USB)
+3. Enable "Install from unknown sources" in Settings > Security
+4. Install and test the app
+5. Test these flows:
+   - Register new account
+   - Login / logout
+   - Forgot password (email code flow)
+   - Add/edit/delete transactions
+   - Dashboard charts load with data
+   - Budget creation and progress bars
+   - Recurring transaction setup
+   - Dark mode toggle
+   - Pull-to-refresh on all lists
+
+
+SECTION 4: PLAY STORE SUBMISSION
+----------------------------------
+
+Step 1: Google Play Console Account
+  - Go to https://play.google.com/console
+  - Pay the one-time $25 registration fee
+  - Complete identity verification (can take 1-2 days)
+
+Step 2: Create App Listing
+  - Click "Create app"
+  - App name: "Expense Tracker"
+  - Default language: English
+  - App type: App (not Game)
+  - Free or Paid: Free (or Paid if you prefer)
+
+Step 3: Store Listing (Main store listing tab)
+  - App name: Expense Tracker
+  - Short description (80 chars max):
+    "Track expenses, manage budgets, and monitor spending habits."
+  - Full description (4000 chars max):
+    "Expense Tracker helps you take control of your personal finances.
+    Track daily expenses and income, set budgets by category, and
+    visualize your spending habits with charts and reports.
+
+    Features:
+    - Add and categorize income and expenses
+    - Set monthly budgets with progress tracking
+    - Visual reports with charts and category breakdowns
+    - Recurring transactions (salary, subscriptions, bills)
+    - Email notifications for large expenses and budget alerts
+    - Weekly spending summary emails
+    - Dark mode support
+    - Secure authentication with password reset via email
+
+    Your data is encrypted in transit and stored securely. We never
+    access your bank accounts or financial institutions."
+  - Upload: icon (512x512), feature graphic (1024x500), 4+ screenshots
+
+Step 4: Privacy Policy
+  - Host privacy-policy.html somewhere publicly accessible:
+    Option A: GitHub Pages (free) - push the file to a repo, enable Pages
+    Option B: Add a route in your Django app to serve it
+    Option C: Any static hosting (Netlify, Vercel, etc.)
+  - Paste the URL in the Privacy Policy field
+
+Step 5: Content Rating
+  - Go to "Content rating" section
+  - Fill out the IARC questionnaire
+  - For a finance tracker: no violence, no sexual content,
+    no gambling, no user interaction between users
+  - You'll likely get "Everyone" rating
+
+Step 6: Data Safety Form
+  Answer these based on what the app actually does:
+  - Does your app collect or share user data? YES
+  - Data types collected:
+    - Personal info: Name (username), Email address
+    - Financial info: Purchase history (user-entered transactions)
+  - Data is:
+    - Encrypted in transit: YES (HTTPS)
+    - Can be deleted by user: YES (individual records + account deletion)
+    - Not shared with third parties: CORRECT
+  - Data is NOT used for: advertising, personalization, analytics
+
+Step 7: Target Audience
+  - Target age: 18+ (recommended for finance apps)
+  - Not designed for children
+
+Step 8: Build & Upload AAB
+  eas build --platform android --profile production
+  - Download the .aab file from the EAS dashboard
+  - In Play Console > Production > Create new release
+  - Upload the .aab file
+  - Add release notes (e.g., "Initial release")
+
+Step 9: Review & Publish
+  - Google reviews the app (typically 1-7 days for first submission)
+  - You'll get an email when approved (or if changes are needed)
+
+
+SECTION 5: RUN TESTS
+----------------------
+  cd C:\Users\rtyui\trackingexpenses_app\expense-tracker-mobile
+  npm test
+
+
+============================================================
+
+NOTE FOR CLAUDE: When the user confirms the build succeeded,
+delete this BUILD_INSTRUCTIONS.txt file.

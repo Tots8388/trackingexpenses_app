@@ -3,6 +3,8 @@ from . import views
 
 urlpatterns = [
     path('register/', views.api_register, name='api_register'),
+    path('password-reset/', views.api_password_reset_request, name='api_password_reset'),
+    path('password-reset/confirm/', views.api_password_reset_confirm, name='api_password_reset_confirm'),
     path('me/', views.api_user_info, name='api_user_info'),
     path('transactions/', views.TransactionListCreateView.as_view(), name='api_transaction_list'),
     path('transactions/<int:pk>/', views.TransactionDetailView.as_view(), name='api_transaction_detail'),

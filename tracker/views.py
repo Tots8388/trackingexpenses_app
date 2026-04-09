@@ -21,7 +21,7 @@ from rest_framework.decorators import api_view, permission_classes as perm_class
 from .models import Transaction, Category, EmailNotificationPreference, Budget, RecurringTransaction
 from .serializers import TransactionSerializer, CategorySerializer, BudgetSerializer, RecurringTransactionSerializer
 from .forms import TransactionForm, NotificationPreferenceForm, BudgetForm, RecurringTransactionForm
-from .emails import check_large_expense, check_budget_alert
+from .emails import check_large_expense, check_budget_alert, send_password_reset_email
 
 
 # ── REST API Views ──
@@ -99,6 +99,60 @@ def api_register(request):
         return Response({'error': 'Username already taken.'}, status=drf_status.HTTP_400_BAD_REQUEST)
     user = User.objects.create_user(username=username, password=password, email=email)
     return Response({'id': user.id, 'username': user.username}, status=drf_status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@perm_classes([permissions.AllowAny])
+def api_password_reset_request(request):
+    """Send a 6-digit reset code to the user's email."""
+    email = request.data.get('email', '').strip()
+    if not email:
+        return Response({'error': 'Email is required.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    from django.contrib.auth.models import User
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # Don't reveal whether the email exists
+        return Response({'message': 'If an account with that email exists, a reset code has been sent.'})
+
+    send_password_reset_email(user)
+    return Response({'message': 'If an account with that email exists, a reset code has been sent.'})
+
+
+@api_view(['POST'])
+@perm_classes([permissions.AllowAny])
+def api_password_reset_confirm(request):
+    """Verify the 6-digit code and set a new password."""
+    email = request.data.get('email', '').strip()
+    code = request.data.get('code', '').strip()
+    new_password = request.data.get('new_password', '').strip()
+
+    if not email or not code or not new_password:
+        return Response({'error': 'Email, code, and new password are required.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    if len(new_password) < 8:
+        return Response({'error': 'Password must be at least 8 characters.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    from django.contrib.auth.models import User
+    from django.core.cache import cache
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({'error': 'Invalid email or code.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    cache_key = f'password_reset_{user.pk}'
+    stored_code = cache.get(cache_key)
+
+    if not stored_code or stored_code != code:
+        return Response({'error': 'Invalid or expired code.'}, status=drf_status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(new_password)
+    user.save()
+    cache.delete(cache_key)
+
+    return Response({'message': 'Password has been reset successfully.'})
 
 
 @api_view(['GET'])

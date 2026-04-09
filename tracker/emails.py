@@ -10,6 +10,31 @@ from django.utils import timezone
 from .models import Transaction, Budget, EmailNotificationPreference
 
 
+def send_password_reset_email(user):
+    """Generate a 6-digit code, cache it for 10 minutes, and email it."""
+    import random
+    from django.core.cache import cache
+
+    code = f'{random.randint(100000, 999999)}'
+    cache_key = f'password_reset_{user.pk}'
+    cache.set(cache_key, code, timeout=600)  # 10 minutes
+
+    context = {
+        'user': user,
+        'code': code,
+    }
+    html = render_to_string('emails/password_reset_code.html', context)
+
+    send_mail(
+        subject='Password Reset Code - Expense Tracker',
+        message=f'Your password reset code is: {code}\n\nThis code expires in 10 minutes.',
+        from_email=None,
+        recipient_list=[user.email],
+        html_message=html,
+        fail_silently=False,
+    )
+
+
 def _get_prefs(user):
     """Get or create notification preferences for a user."""
     prefs, _ = EmailNotificationPreference.objects.get_or_create(user=user)

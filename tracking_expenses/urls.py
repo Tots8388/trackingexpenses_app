@@ -5,8 +5,16 @@ from django.conf.urls.static import static
 from django.http import HttpResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+
+def privacy_policy(request):
+    policy_path = settings.BASE_DIR / 'expense-tracker-mobile' / 'privacy-policy.html'
+    with open(policy_path) as f:
+        return HttpResponse(f.read(), content_type='text/html')
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('privacy-policy/', privacy_policy, name='privacy_policy'),
     path('api/', include('tracker.api_urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -20,7 +28,7 @@ if not settings.DEBUG:
             return HttpResponse(f.read(), content_type='text/html')
 
     urlpatterns += [
-        re_path(r'^(?!api/|admin/|static/).*$', serve_react),
+        re_path(r'^(?!api/|admin/|static/|privacy-policy/).*$', serve_react),
     ]
 else:
     # In development, keep the Django template views
